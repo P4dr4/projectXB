@@ -1,0 +1,17 @@
+{
+  "name": "projectxb",
+  "version": "0.0.1",
+  "description": "backend for projectXF",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "node index.js"
+  },
+  "author": "Pedro Accarini Barros de Azevedo",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "fs": "^0.0.1-security"
+  }
+}
