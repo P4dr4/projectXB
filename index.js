@@ -13,7 +13,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.send('');
 });
 
 app.post('/signup', (req, res) => {
@@ -44,6 +44,33 @@ app.post('/signup', (req, res) => {
   });
 });
 
+app.post('/login', (req, res) => { 
+  const { username, password } = req.body;
+  console.log(`Login attempt with username: ${username} and password: ${password}`);
+
+  fs.readFile('users.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading users.json:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+
+    let users = [];
+    if (data) {
+      users = JSON.parse(data);
+      console.log('Users:', users);
+    }
+
+    const user = users.find(user => user.username === username && user.password === password);
+    console.log(`User found: ${user ? 'Yes' : 'No'}`);
+
+    if (user) {
+      res.status(200).json({ message: 'User logged in successfully' });
+    } else {
+      res.status(401).json({ message: 'Invalid credentials' });
+    }
+  });
+});
+
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on port ${port}`);
 });
