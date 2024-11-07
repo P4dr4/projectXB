@@ -1,8 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const app = express();
 const port = 3000;
 const fs = require('fs');
+// Remove the Octokit require here
 
 app.use(cors());
 app.use(express.json());
@@ -191,6 +193,50 @@ app.post('/vue', (req, res) => {
       res.status(404).json({ message: 'User not found' });
     }
   });
+});
+
+// chamada para criar um repositorio no github
+app.post('/github', async (req, res) => {
+  try {
+    const { username, repository } = req.body;
+    console.log(`Creating repository ${repository} for user ${username}`);
+
+    // Dynamic import of Octokit
+    const { Octokit } = await import('@octokit/core');
+    const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
+    fs.readFile('users.json', 'utf8', async (err, data) => {
+      if (err) {
+        console.error('Error reading users.json:', err);
+        return res.status(500).json({ message: 'Internal server error' });
+      }
+
+      let users = [];
+      if (data) {
+        users = JSON.parse(data);
+      }
+
+      const user = users.find(user => user.username === username);
+      if (user) {
+        try {
+          const response = await octokit.request('POST /user/repos', {
+            name: repository,
+            private: true,
+          });
+          console.log('Repository created:', response.data);
+          res.status(201).json({ message: 'Repository created successfully', repository: response.data });
+        } catch (error) {
+          console.error('Error creating repository:', error);
+          res.status(500).json({ message: 'Error creating repository' });
+        }
+      } else {
+        res.status(404).json({ message: 'User not found' });
+      }
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 app.listen(port, () => {
