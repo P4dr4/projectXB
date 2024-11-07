@@ -116,38 +116,80 @@ app.post('/angular', (req, res) => {
 });
 
 app.post('/react', (req, res) => {
-  fs.readFile('frameworks.json', 'utf8', (err, data) => {
+  const { username } = req.body;
+
+  fs.readFile('users.json', 'utf8', (err, data) => {
     if (err) {
-      console.error('Error reading frameworks.json:', err);
+      console.error('Error reading users.json:', err);
       return res.status(500).json({ message: 'Internal server error' });
     }
 
-    let frameworks = [];
+    let users = [];
     if (data) {
-      frameworks = JSON.parse(data);
-      console.log('Frameworks:', frameworks);
+      users = JSON.parse(data);
     }
 
-    const reactFramework = frameworks.find(fw => fw.name === 'React');
-    res.status(200).json({ framework: reactFramework });
+    const user = users.find(user => user.username === username);
+    if (user) {
+      if (!user.userFrameworks) {
+        user.userFrameworks = ['React'];
+      } else if (Array.isArray(user.userFrameworks)) {
+        if (!user.userFrameworks.includes('React')) {
+          user.userFrameworks.push('React');
+        }
+      } else {
+        user.userFrameworks = [user.userFrameworks, 'React'];
+      }
+
+      fs.writeFile('users.json', JSON.stringify(users, null, 2), err => {
+        if (err) {
+          console.error('Error writing to users.json:', err);
+          return res.status(500).json({ message: 'Internal server error' });
+        }
+        res.status(200).json({ message: 'Framework added to user', framework: 'React' });
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
   });
 });
 
 app.post('/vue', (req, res) => {
-  fs.readFile('frameworks.json', 'utf8', (err, data) => {
+  const { username } = req.body;
+
+  fs.readFile('users.json', 'utf8', (err, data) => {
     if (err) {
-      console.error('Error reading frameworks.json:', err);
+      console.error('Error reading users.json:', err);
       return res.status(500).json({ message: 'Internal server error' });
     }
 
-    let frameworks = [];
+    let users = [];
     if (data) {
-      frameworks = JSON.parse(data);
-      console.log('Frameworks:', frameworks);
+      users = JSON.parse(data);
     }
 
-    const vueFramework = frameworks.find(fw => fw.name === 'Vue');
-    res.status(200).json({ framework: vueFramework });
+    const user = users.find(user => user.username === username);
+    if (user) {
+      if (!user.userFrameworks) {
+        user.userFrameworks = ['Vue'];
+      } else if (Array.isArray(user.userFrameworks)) {
+        if (!user.userFrameworks.includes('Vue')) {
+          user.userFrameworks.push('Vue');
+        }
+      } else {
+        user.userFrameworks = [user.userFrameworks, 'Vue'];
+      }
+
+      fs.writeFile('users.json', JSON.stringify(users, null, 2), err => {
+        if (err) {
+          console.error('Error writing to users.json:', err);
+          return res.status(500).json({ message: 'Internal server error' });
+        }
+        res.status(200).json({ message: 'Framework added to user', framework: 'Vue' });
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
   });
 });
 

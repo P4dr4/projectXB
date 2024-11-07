@@ -1,6 +1,6 @@
 {
   "name": "projectxb",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "backend for projectXF",
   "main": "index.js",
   "scripts": {
