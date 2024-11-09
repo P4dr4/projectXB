@@ -1,78 +1,73 @@
+// Suppress deprecation warning
+process.removeAllListeners('warning');
+
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const app = express();
 const port = 3000;
 const fs = require('fs');
 
+// Import routes
+const rootRoute = require('./routes/root');
+const signupRoute = require('./routes/signup');
+const loginRoute = require('./routes/login');
+const angularRoute = require('./frameworks/angular');
+
+// Create route handlers first
+const reactRoute = express.Router();
+const vueRoute = express.Router();
+
 app.use(cors());
 app.use(express.json());
 
-app.use((req, res, next) => {
-  console.log(`${req.method} request for '${req.url}'`);
-  next();
-});
+// Use routes
+app.use('/', rootRoute);
+app.use('/signup', signupRoute);
+app.use('/login', loginRoute);
+app.use('/angular', angularRoute);
+app.use('/react', require('./frameworks/react'));
+app.use('/vue', require('./frameworks/vue'));
 
-app.get('/', (req, res) => {
-  res.send('');
-});
+app.post('/github', async (req, res) => {
+  try {
+    const { username, repository } = req.body;
+    console.log(`Creating repository ${repository} for user ${username}`);
 
-app.post('/signup', (req, res) => {
-  const { username, email, password } = req.body;
-  const newUser = { username, email, password, userFrameworks: [] };
+    const { Onctokit } = require('@octokit/core');
 
-  fs.readFile('users.json', 'utf8', (err, data) => {
-    let users = [];
-    if (!err && data) {
-      users = JSON.parse(data);
-    }
+    fs.readFile('users.json', 'utf8', async (err, data) => {
+      if (err) {
+        console.error('Error reading users.json:', err);
+        return res.status(500).json({ message: 'Internal server error' });
+      }
 
-    const userExists = users.some(user => user.email === email);
+      let users = [];
+      if (data) {
+        users = JSON.parse(data);
+      }
 
-    if (userExists) {
-      res.status(400).send('User already exists');
-    } else {
-      users.push(newUser);
-
-      fs.writeFile('users.json', JSON.stringify(users, null, 2), err => {
-        if (err) {
-          res.status(500).send('Error saving user');
-        } else {
-          res.status(201).send('User signed up successfully');
+      const user = users.find(user => user.username === username);
+      if (user) {
+        try {
+          const response = await octokit.request('POST /user/repos', {
+            name: repository,
+            private: true,
+          });
+          console.log('Repository created:', response.data);
+          res.status(201).json({ message: 'Repository created successfully', repository: response.data });
+        } catch (error) {
+          console.error('Error creating repository:', error);
+          res.status(500).json({ message: 'Error creating repository' });
         }
-      });
-    }
-  });
-});
-
-app.post('/login', (req, res) => { 
-  const { username, password } = req.body;
-  console.log(`Login attempt with username: ${username} and password: ${password}`);
-
-  fs.readFile('users.json', 'utf8', (err, data) => {
-    if (err) {
-      console.error('Error reading users.json:', err);
-      return res.status(500).json({ message: 'Internal server error' });
-    }
-
-    let users = [];
-    if (data) {
-      users = JSON.parse(data);
-      console.log('Users:', users);
-    }
-
-    const user = users.find(user => user.username === username && user.password === password);
-    console.log(`User found: ${user ? 'Yes' : 'No'}`);
-
-    if (user) {
-      res.status(200).json({ 
-        message: 'User logged in successfully', 
-        username: user.username,
-        userFrameworks: user.userFrameworks || []
-      });
-    } else {
-      res.status(401).json({ message: 'Invalid credentials' });
-    }
-  });
+      } else {
+        res.status(404).json({ message: 'User not found' });
+      }
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 app.post('/angular', (req, res) => {
