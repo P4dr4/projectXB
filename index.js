@@ -70,6 +70,82 @@ app.post('/github', async (req, res) => {
   }
 });
 
+app.post('/angular', (req, res) => {
+  const { username } = req.body;
+
+  fs.readFile('users.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading users.json:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+
+    let users = [];
+    if (data) {
+      users = JSON.parse(data);
+      console.log('Users:', users);
+    }
+
+    const user = users.find(user => user.username === username);
+    if (user) {
+      if (!user.userFrameworks) {
+        user.userFrameworks = ['Angular'];
+      } else if (Array.isArray(user.userFrameworks)) {
+        if (!user.userFrameworks.includes('Angular')) {
+          user.userFrameworks.push('Angular');
+        }
+      } else {
+        user.userFrameworks = [user.userFrameworks, 'Angular'];
+      }
+
+      fs.writeFile('users.json', JSON.stringify(users, null, 2), err => {
+        if (err) {
+          console.error('Error writing to users.json:', err);
+          return res.status(500).json({ message: 'Internal server error' });
+        }
+        res.status(200).json({ message: 'Framework added to user', framework: 'Angular' });
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  });
+});
+
+app.post('/react', (req, res) => {
+  fs.readFile('frameworks.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading frameworks.json:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+
+    let frameworks = [];
+    if (data) {
+      frameworks = JSON.parse(data);
+      console.log('Frameworks:', frameworks);
+    }
+
+    const reactFramework = frameworks.find(fw => fw.name === 'React');
+    res.status(200).json({ framework: reactFramework });
+  });
+});
+
+app.post('/vue', (req, res) => {
+  fs.readFile('frameworks.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading frameworks.json:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+
+    let frameworks = [];
+    if (data) {
+      frameworks = JSON.parse(data);
+      console.log('Frameworks:', frameworks);
+    }
+
+    const vueFramework = frameworks.find(fw => fw.name === 'Vue');
+    res.status(200).json({ framework: vueFramework });
+  });
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
