@@ -1,4 +1,3 @@
-// Suppress deprecation warning
 process.removeAllListeners('warning');
 
 require('dotenv').config();
@@ -8,23 +7,21 @@ const app = express();
 const port = 3000;
 const fs = require('fs');
 
-// Import routes
 const rootRoute = require('./routes/root');
 const signupRoute = require('./routes/signup');
 const loginRoute = require('./routes/login');
 const angularRoute = require('./frameworks/angular');
 
-// Create route handlers first
 const reactRoute = express.Router();
 const vueRoute = express.Router();
 
 app.use(cors());
 app.use(express.json());
 
-// Use routes
 app.use('/', rootRoute);
 app.use('/signup', signupRoute);
 app.use('/login', loginRoute);
+
 app.use('/angular', angularRoute);
 app.use('/react', require('./frameworks/react'));
 app.use('/vue', require('./frameworks/vue'));

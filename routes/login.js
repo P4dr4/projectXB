@@ -4,7 +4,7 @@ const fs = require('fs');
 
 router.post('/', (req, res) => { 
   const { username, password } = req.body;
-  console.log(`Login attempt with username: ${username} and password: ${password}`);
+  console.log(`Login attempt with username: ${username}`);
 
   fs.readFile('users.json', 'utf8', (err, data) => {
     if (err) {
