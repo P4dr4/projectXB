@@ -1,12 +1,13 @@
 {
   "name": "projectxb",
-  "version": "0.1.1",
+  "version": "0.2.2",
   "description": "backend for projectXF",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "run": "node index.js"
+    "run": "node index.js",
+    "start": "node index.js"
   },
   "author": "Pedro Accarini Barros de Azevedo",
   "license": "ISC",
