@@ -6,12 +6,10 @@ const cors = require('cors');
 const app = express();
 const port = 3000;
 const fs = require('fs');
-
 const rootRoute = require('./routes/root');
 const signupRoute = require('./routes/signup');
 const loginRoute = require('./routes/login');
 const angularRoute = require('./frameworks/angular');
-
 const reactRoute = express.Router();
 const vueRoute = express.Router();
 
