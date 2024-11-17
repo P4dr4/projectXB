@@ -1,36 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const fs = require('fs');
+const User = require('../models/User');
 
-router.post('/', (req, res) => { 
+router.post('/', async (req, res) => {
   const { username, password } = req.body;
 
-  console.log(`Login attempt with username: ${username}`);
-
-  fs.readFile('users.json', 'utf8', (err, data) => {
-    if (err) {
-      console.error('Error reading users.json:', err);
-      return res.status(500).json({ message: 'Internal server error' });
-    }
-
-    let users = [];
-    if (data) {
-      users = JSON.parse(data);
-    }
-
-    const user = users.find(user => user.username === username && user.password === password);
-    console.log(`User found: ${user ? 'Yes' : 'No'}`);
-
+  try {
+    const user = await User.findOne({ username, password });
+    
     if (user) {
-      res.status(200).json({ 
-        message: 'User logged in successfully', 
+      res.status(200).json({
+        message: 'User logged in successfully',
         username: user.username,
-        userFrameworks: user.userFrameworks || []
+        userFrameworks: user.userFrameworks
       });
     } else {
       res.status(401).json({ message: 'Invalid credentials' });
     }
-  });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 module.exports = router;

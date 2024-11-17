@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const fs = require('fs');
+const User = require('../models/User');
 const { Octokit } = require('@octokit/rest');
 require('dotenv').config();
 
@@ -139,80 +139,60 @@ router.post('/', async (req, res) => {
   if (!username || !repository) {
     return res.status(400).json({ message: 'Username and repository name are required' });
   }
-  console.log(`Creating Vue repository '${repository}' for user '${username}'`);
 
   try {
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+    const user = await User.findOne({ username });
 
-    fs.readFile('users.json', 'utf8', async (err, data) => {
-      if (err) {
-        console.error('Error reading users.json:', err);
-        return res.status(500).json({ message: 'Internal server error' });
-      }
-
-      let users = data ? JSON.parse(data) : [];
-      const user = users.find(user => user.username === username);
-
-      if (user) {
+    if (user) {
+      try {
+        // Check if repo exists
         try {
-          try {
-            await octokit.request('GET /repos/{owner}/{repo}', {
-              owner: username,
-              repo: repository
-            });
-            return res.status(400).json({ message: 'Repository already exists' });
-          } catch (error) {
-            if (error.status !== 404) {
-              throw error;
-            }
-          }
-
-          const repoResponse = await octokit.request('POST /user/repos', {
-            name: repository,
-            private: true,
-            auto_init: true,
-            description: 'Vue project created with ProjectXB'
+          await octokit.request('GET /repos/{owner}/{repo}', {
+            owner: username,
+            repo: repository
           });
-
-          await new Promise(resolve => setTimeout(resolve, 2000));
-
-          const result = await createVueFiles(octokit, username, repository);
-
-          if (!user.userFrameworks) {
-            user.userFrameworks = [];
-          }
-
-          if (!user.userFrameworks.includes('Vue')) {
-            user.userFrameworks.push('Vue');
-            fs.writeFileSync('users.json', JSON.stringify(users, null, 2));
-          }
-
-          res.status(201).json({
-            success: true,
-            message: result.hasErrors 
-              ? 'Repository created with some files missing'
-              : 'Repository created successfully',
-            data: {
-              name: repository,
-              url: result.repoUrl,
-              filesCreated: result.filesCreated
-            }
-          });
-
+          return res.status(400).json({ message: 'Repository already exists' });
         } catch (error) {
-          console.error('Error creating repository:', error);
-          res.status(500).json({ message: 'Error creating repository: ' + error.message });
+          if (error.status !== 404) throw error;
         }
-      } else {
-        res.status(404).json({ message: 'User not found' });
+
+        // Create repository and files
+        await octokit.request('POST /user/repos', {
+          name: repository,
+          private: true,
+          auto_init: true,
+          description: 'Vue project created with ProjectXB'
+        });
+
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        const result = await createVueFiles(octokit, username, repository);
+
+        // Update user frameworks
+        if (!user.userFrameworks.includes('Vue')) {
+          user.userFrameworks.push('Vue');
+          await user.save();
+        }
+
+        res.status(201).json({
+          success: true,
+          message: result.hasErrors ? 'Repository created with some files missing' : 'Repository created successfully',
+          data: {
+            name: repository,
+            url: result.repoUrl,
+            filesCreated: result.filesCreated
+          }
+        });
+      } catch (error) {
+        console.error('Error creating repository:', error);
+        res.status(500).json({ message: 'Error creating repository: ' + error.message });
       }
-    });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ 
-      success: false,
-      message: error.message || 'An error occurred while creating the repository',
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
