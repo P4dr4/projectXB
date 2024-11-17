@@ -1,6 +1,6 @@
 {
   "name": "projectxb",
-  "version": "0.3.2",
+  "version": "0.5.0",
   "description": "backend for projectXF",
   "main": "index.js",
   "type": "commonjs",
@@ -17,6 +17,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
-    "fs": "^0.0.1-security"
+    "fs": "^0.0.1-security",
+    "mongodb": "^6.10.0",
+    "mongoose": "^8.8.1"
   }
 }

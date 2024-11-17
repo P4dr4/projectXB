@@ -12,9 +12,20 @@ const loginRoute = require('./routes/login');
 const angularRoute = require('./frameworks/angular');
 const reactRoute = express.Router();
 const vueRoute = express.Router();
+const connectDB = require('./config/database');
 
 app.use(cors());
 app.use(express.json());
+
+// Connect to MongoDB before setting up routes
+connectDB().then(() => {
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+}).catch(error => {
+  console.error('Failed to connect to MongoDB:', error);
+  process.exit(1);
+});
 
 app.use('/', rootRoute);
 app.use('/signup', signupRoute);
@@ -139,8 +150,4 @@ app.post('/vue', (req, res) => {
     const vueFramework = frameworks.find(fw => fw.name === 'Vue');
     res.status(200).json({ framework: vueFramework });
   });
-});
-
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
 });
