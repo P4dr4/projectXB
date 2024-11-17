@@ -17,9 +17,12 @@ const connectDB = require('./config/database');
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB before setting up routes
-connectDB().then(() => {
-  app.listen(port, () => {
+const mongoUri = process.env.MONGO_URL || 'mongodb://localhost:27017/projectx';
+
+console.log('Connecting to MongoDB at:', mongoUri);
+
+connectDB(mongoUri).then(() => {
+  app.listen(port, '0.0.0.0', () => {
     console.log(`Server is running on port ${port}`);
   });
 }).catch(error => {
