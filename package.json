@@ -1,6 +1,6 @@
 {
   "name": "projectxb",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "description": "backend for projectXF",
   "main": "index.js",
   "type": "commonjs",

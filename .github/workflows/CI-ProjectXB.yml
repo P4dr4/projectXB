@@ -1,4 +1,5 @@
-name: Node.js CI with Docker Deployment
+
+name: Node.js CI
 
 on:
   push:
@@ -8,11 +9,9 @@ on:
   pull_request:
     branches:
       - main
-    types:
-      - closed
 
 jobs:
-  Node_CI_Deploy:
+  Node_CI:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,6 +26,3 @@ jobs:
 
       - name: Check for vulnerabilities
         run: npm audit
-
-      # Removed Deployment Steps
-
