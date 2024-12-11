@@ -14,6 +14,10 @@ const reactRoute = express.Router();
 const vueRoute = express.Router();
 const connectDB = require('./config/database');
 
+const { NodeSDK } = require('@opentelemetry/sdk-node');
+const { PrometheusExporter } = require('@opentelemetry/exporter-prometheus');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+
 app.use(cors());
 app.use(express.json());
 
@@ -29,6 +33,19 @@ connectDB(mongoUri).then(() => {
   console.error('Failed to connect to MongoDB:', error);
   process.exit(1);
 });
+
+// Configurar o exportador Prometheus
+const prometheusExporter = new PrometheusExporter({ startServer: true });
+
+// Inicializar o SDK do OpenTelemetry
+const sdk = new NodeSDK({
+  metricExporter: prometheusExporter,
+  metricInterval: 1000,
+  instrumentations: [getNodeAutoInstrumentations()]
+});
+
+// Iniciar o SDK
+sdk.start();
 
 app.use('/', rootRoute);
 app.use('/signup', signupRoute);
@@ -153,4 +170,12 @@ app.post('/vue', (req, res) => {
     const vueFramework = frameworks.find(fw => fw.name === 'Vue');
     res.status(200).json({ framework: vueFramework });
   });
+});
+
+// Encerrar o SDK ao finalizar o processo
+process.on('SIGTERM', () => {
+  sdk.shutdown()
+    .then(() => console.log('SDK OpenTelemetry finalizado'))
+    .catch((err) => console.log('Erro ao finalizar o SDK', err))
+    .finally(() => process.exit(0));
 });
