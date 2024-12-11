@@ -4,6 +4,8 @@ users.json
 
 # Dependency directories
 node_modules/
+package-lock.json
+.env
 
 # Package lock files
 package-lock.json

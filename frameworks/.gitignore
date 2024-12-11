@@ -1,0 +1,6 @@
+# Sensitive files
+
+users.json
+node_modules/
+package-lock.json
+.env
