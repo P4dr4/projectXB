@@ -1,37 +1,41 @@
-name: Autofix CI
+name: CI
 
 on:
   push:
     branches:
-      - feature/*
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  autofix:
+  Autofix:
+    name: Autofix CI
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '20'
-      
-      - name: Install dependencies
-        id: npm-install
-        run: | 
-          npm_output=$(npm install)
-      
-      - name: Run autofix calling chatgpt2
-        run: |
-          API_TOKEN=${{ secrets.HF_API_TOKEN }}
-          MODEL="gpt2"
-          INPUT_TEXT="Please advise on this output from npm install output: ${{ steps.npm-install.outputs.npm_output }}. Use less than 30 words in your response."
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
 
-          RESPONSE=$(curl -s -X POST "https://api-inference.huggingface.co/models/$MODEL" \
-              -H "Authorization: Bearer $API_TOKEN" \
-              -H "Content-Type: application/json" \
-              -d "{\"inputs\": \"$INPUT_TEXT\"}")
+    - name: Install dependencies
+      run: |
+        npm_output=$(npm install)
+        echo "npm install output: $npm_output"
 
-          echo "Resposta da API: $RESPONSE"
+    - name: Run API call
+      run: |
+        API_TOKEN=${{ secrets.HF_API_TOKEN }}
+        MODEL="gpt2"
+        INPUT_TEXT="Please advise on this output from npm install output: . Use less than 30 words in your response."
+        
+        RESPONSE=$(curl -s -X POST "https://api-inference.huggingface.co/models/$MODEL" \
+            -H "Authorization: Bearer $API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{\"inputs\": \"$INPUT_TEXT\"}")
+        
+        echo "Resposta da API: $RESPONSE"
