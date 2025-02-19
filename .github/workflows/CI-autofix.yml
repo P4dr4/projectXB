@@ -23,11 +23,10 @@ jobs:
       id: npm-install-autofix
       run: |
         npm_output=$(npm install)
-        echo "npm_output=$npm_output"
         sanitized_output=$(echo "$npm_output" | jq -Rs .)
         API_TOKEN=${{ secrets.HF_API_TOKEN }}
         MODEL="gpt2"
-        INPUT_TEXT="Summarize the following npm install output in less than 30 words: $sanitized_output"
+        INPUT_TEXT="Summarize the following npm install output in less than 20 words: $sanitized_output"
         
         RESPONSE=$(curl -s -X POST "https://api-inference.huggingface.co/models/$MODEL" \
             -H "Authorization: Bearer $API_TOKEN" \
@@ -35,4 +34,4 @@ jobs:
             -d "{\"inputs\": $sanitized_output}")
         
         summary=$(echo $RESPONSE | jq -r '.[0].generated_text')
-        echo "Resposta da API: $summary"
+        echo "Summary: $summary"
