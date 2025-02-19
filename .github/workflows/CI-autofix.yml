@@ -22,8 +22,9 @@ jobs:
     - name: Install dependencies
       id: npm-install
       run: |
-        npm_output=$(npm install)
-        echo "npm install output: $npm_output"
+        npm install | tee npm_install_output.txt
+        npm_output=$(cat npm_install_output.txt)
+        echo "::set-output name=npm_output::$npm_output"
 
     - name: Run API call
       run: |
