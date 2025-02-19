@@ -27,7 +27,7 @@ jobs:
         run: |
           API_TOKEN=${{ secrets.HF_API_TOKEN }}
           MODEL="gpt2"
-          INPUT_TEXT="Please advise on this output from npm install output: ${{ steps.npm-install.outputs.npm_output }}. Use less than 100 words."
+          INPUT_TEXT="Please advise on this output from npm install output: ${{ steps.npm-install.outputs.npm_output }}. Use less than 30 words in your response."
 
           RESPONSE=$(curl -s -X POST "https://api-inference.huggingface.co/models/$MODEL" \
               -H "Authorization: Bearer $API_TOKEN" \
