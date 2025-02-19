@@ -3,13 +3,11 @@ name: CI
 on:
   push:
     branches:
-      - main
-  pull_request:
-    branches:
-      - main
+      - feature/*
 
 jobs:
   Autofix:
+    name: Autofix CI
     runs-on: ubuntu-latest
 
     steps:
