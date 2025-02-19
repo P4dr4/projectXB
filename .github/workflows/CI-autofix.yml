@@ -33,5 +33,5 @@ jobs:
             -H "Content-Type: application/json" \
             -d "{\"inputs\": $sanitized_output}")
         
-        summary=$(echo $RESPONSE | jq -r '.[0].generated_text')
+        summary=$(echo $RESPONSE | jq -r '.[0].generated_text' | awk '{for(i=1;i<=20;i++) printf $i" "; print ""}')
         echo "Summary: $summary"
