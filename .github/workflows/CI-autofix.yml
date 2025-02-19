@@ -10,7 +10,6 @@ on:
 
 jobs:
   Autofix:
-    name: Autofix CI
     runs-on: ubuntu-latest
 
     steps:
