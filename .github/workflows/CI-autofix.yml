@@ -23,14 +23,14 @@ jobs:
       id: npm-install
       run: |
         npm install | tee npm_install_output.txt
-        npm_output=$(cat npm_install_output.txt)
+        npm_output=$(cat npm_install_output.txt | base64)
         echo "npm_output=$npm_output" >> $GITHUB_ENV
 
     - name: Run API call
       run: |
         API_TOKEN=${{ secrets.HF_API_TOKEN }}
         MODEL="gpt2"
-        INPUT_TEXT="Please advise on this output from npm install output: ${{ env.npm_output }}. Use less than 30 words in your response."
+        INPUT_TEXT="Please advise on this output from npm install output: $(echo ${{ env.npm_output }} | base64 --decode). Use less than 30 words in your response."
         
         RESPONSE=$(curl -s -X POST "https://api-inference.huggingface.co/models/$MODEL" \
             -H "Authorization: Bearer $API_TOKEN" \
