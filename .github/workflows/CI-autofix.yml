@@ -20,13 +20,14 @@ jobs:
       
       - name: Install dependencies
         id: npm-install
-        run: npm install
+        run: | 
+          npm_output=$(npm install)
       
       - name: Run autofix calling chatgpt2
         run: |
           API_TOKEN=${{ secrets.HF_API_TOKEN }}
           MODEL="gpt2"
-          INPUT_TEXT="Olá, como você está?"
+          INPUT_TEXT="Please advise on this output from npm install output: ${{ steps.npm-install.outputs.npm_output }}. Use less than 100 words."
 
           RESPONSE=$(curl -s -X POST "https://api-inference.huggingface.co/models/$MODEL" \
               -H "Authorization: Bearer $API_TOKEN" \
