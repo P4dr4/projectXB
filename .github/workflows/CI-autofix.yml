@@ -33,5 +33,5 @@ jobs:
             -H "Content-Type: application/json" \
             -d "{\"inputs\": INPUT_TEXT}")
         
-        summary=$(echo $RESPONSE | jq -r '.[0].generated_text')
+        summary=$(echo $RESPONSE)
         echo "Summary: $summary"
