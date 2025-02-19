@@ -31,7 +31,7 @@ jobs:
         RESPONSE=$(curl -s -X POST "https://api-inference.huggingface.co/models/$MODEL" \
             -H "Authorization: Bearer $API_TOKEN" \
             -H "Content-Type: application/json" \
-            -d "{\"inputs\": INPUT_TEXT}")
+            -d "{\"inputs\": $INPUT_TEXT}")
         
         summary=$(echo $RESPONSE)
         echo "Summary: $summary"
