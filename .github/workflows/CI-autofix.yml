@@ -24,13 +24,14 @@ jobs:
       run: |
         npm_output=$(npm install)
         echo "npm_output=$npm_output"
+        sanitized_output=$(echo "$npm_output" | jq -Rs .)
         API_TOKEN=${{ secrets.HF_API_TOKEN }}
         MODEL="gpt2"
-        INPUT_TEXT="Please advise on this output from npm install output: $npm_output. Use less than 30 words in your response."
+        INPUT_TEXT="Please advise on this output from npm install output: $sanitized_output. Use less than 30 words in your response."
         
         RESPONSE=$(curl -s -X POST "https://api-inference.huggingface.co/models/$MODEL" \
             -H "Authorization: Bearer $API_TOKEN" \
             -H "Content-Type: application/json" \
-            -d "{\"inputs\": \"$INPUT_TEXT\"}")
+            -d "{\"inputs\": $sanitized_output}")
         
         echo "Resposta da API: $RESPONSE"
