@@ -13,9 +13,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Generate Tag and Release
+      - name: Authenticate with GitHub
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          $version = (cat package.json | grep version | sed 's/"version": //g' | sed 's/,//g' | sed 's/"//g')
+          git config --global user.email ${{ secrets.EMAIL_GITHUB }}
+          git config --global user.name ${{ secrets.USERNAME_GITHUB }}
+          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git
+
+      - name: Generate Tag and Release
+        id: generate_tag
+        run: |
+          version=$(cat package.json | grep version | sed 's/"version": //g' | sed 's/,//g' | sed 's/"//g')
           echo "Version: $version"
           git tag -a $version -m "Release $version"
           git push origin $version
